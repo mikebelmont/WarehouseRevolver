@@ -1,0 +1,28 @@
+﻿@page "/WhatsNext"
+@inject NavigationManager NavigationManager
+
+
+<h3>WhatNext</h3>
+
+<MudText Typo="Typo.h6">Most items picked</MudText>
+<MudText Typo="Typo.h6">Warehouse stats</MudText>
+<MudText Typo="Typo.h6">items to be received in</MudText>
+<MudText Typo="Typo.h6">on delivery</MudText>
+
+
+@code {
+    private System.Threading.Timer? _navigationTimer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _navigationTimer = new System.Threading.Timer(NavigateToWarehouseActivity, null, 2000, Timeout.Infinite);
+    }
+    private void NavigateToWarehouseActivity(object? state)
+    {
+        InvokeAsync(() =>
+        {
+            NavigationManager.NavigateTo("/");
+            _navigationTimer?.Dispose();
+        });
+    }
+}

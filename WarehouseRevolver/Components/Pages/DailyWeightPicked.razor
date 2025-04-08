@@ -1,0 +1,78 @@
+﻿@page "/DailyWeightPicked"
+@inject IReadtotalweightUseCase readtotalweightUseCase
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+
+<MudContainer MaxWidth="MaxWidth.ExtraExtraLarge" Class="mt-0">
+    <MudCard Elevation="3" Class="pa-4">
+        <MudText Typo="Typo.h5" Class="ma-0">Daily Weight Picked by Employee</MudText>
+
+        <MudChart ChartType="ChartType.Bar"
+                  ChartSeries="@Series"
+                  XAxisLabels="@Labels"/>
+
+        <MudSimpleTable Style="overflow-x: auto;" Class="mt-0">
+            <thead>
+                <tr>
+                    <th>Employee Name</th>
+                    <th>Total Weight</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in _orders)
+                {
+                    <tr>
+                        <td>@order.EmployeeName</td>
+                        <td>@order.TotalWeight.ToString("N2") kg</td>
+                    </tr>
+                }
+            </tbody>
+        </MudSimpleTable>
+    </MudCard>
+</MudContainer>
+
+@code {
+    private List<totalweight> _orders = new List<totalweight>();
+    private System.Threading.Timer? _navigationTimer;
+
+    private List<ChartSeries> Series = new List<ChartSeries>();
+    private string[] Labels = Array.Empty<string>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _navigationTimer = new System.Threading.Timer(NavigateToWarehouseActivity, null, 10000, Timeout.Infinite);
+        await LoadDataAsync();
+    }
+
+    private async Task LoadDataAsync()
+    {
+        _orders = readtotalweightUseCase.Execute();
+
+        // Prepare chart data
+        Labels = _orders.Select(o => o.EmployeeName).ToArray();
+        Series = new List<ChartSeries>
+        {
+            new ChartSeries()
+            {
+                Name = "Total Weight Picked",
+                Data = _orders.Select(o => (double)o.TotalWeight).ToArray()
+            }
+        };
+
+        StateHasChanged();
+    }
+
+    private void NavigateToWarehouseActivity(object? state)
+    {
+        InvokeAsync(() =>
+        {
+            NavigationManager.NavigateTo("/WhatsNext");
+            _navigationTimer?.Dispose();
+        });
+    }
+
+    public void Dispose()
+    {
+        _navigationTimer?.Dispose();
+    }
+}

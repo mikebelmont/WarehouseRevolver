@@ -1,0 +1,38 @@
+﻿@page "/"
+@inject NavigationManager NavigationManager
+@implements IDisposable
+
+<MudContainer Class="d-flex flex-column align-center justify-center" Style="height: 80vh;">
+    <MudText Typo="Typo.h3" Class="mb-4">Generating Data for the Warehouse Revolver</MudText>
+    <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+    <MudText Class="mt-4">Redirecting to Ready to Pick in @_secondsRemaining seconds...</MudText>
+</MudContainer>
+
+@code {
+    private int _secondsRemaining = 5;
+    private System.Threading.Timer? _timer;
+
+    protected override void OnInitialized()
+    {
+        _timer = new System.Threading.Timer(_ =>
+        {
+            InvokeAsync(async () =>
+            {
+                _secondsRemaining--;
+                if (_secondsRemaining <= 0)
+                {
+                    NavigationManager.NavigateTo("/readytopick");
+                }
+                else
+                {
+                    StateHasChanged();
+                }
+            });
+        }, null, 0, 1000); // Update every second
+    }
+
+    public void Dispose()
+    {
+        _timer?.Dispose();
+    }
+}

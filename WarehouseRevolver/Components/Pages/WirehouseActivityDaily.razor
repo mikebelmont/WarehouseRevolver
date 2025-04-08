@@ -1,0 +1,79 @@
+﻿@page "/WirehouseActivityDaily"
+@inject IReadbelWirelessTransactionsDailyUseCase readbelWirelessTransactionsDailyUseCase
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+
+<MudContainer MaxWidth="MaxWidth.ExtraExtraLarge" Class="ma-0">
+    <MudPaper Elevation="3" Class="pa-0">
+        <MudGrid>
+            <MudItem xs="12">
+                <MudText Typo="Typo.h2" Color="Color.Primary" Class="ma-3" Align="Align.Center">Warehouse (line) Activity</MudText>
+                <MudTable Items="@_orders" Dense="true" Hover="true">
+                    <HeaderContent>
+                        <MudTh><MudText Typo="Typo.h6" Style="font-weight: 600;">Employee</MudText></MudTh>
+                        <MudTh><MudText Typo="Typo.h6" Style="font-weight: 600;">Type</MudText></MudTh>
+                        <MudTh><MudText Typo="Typo.h6" Style="font-weight: 600;">Number</MudText></MudTh>
+                        <MudTh><MudText Typo="Typo.h6" Style="font-weight: 600;">Line</MudText></MudTh>
+                        <MudTh><MudText Typo="Typo.h6" Style="font-weight: 600;">Started</MudText></MudTh>
+                        <MudTh><MudText Typo="Typo.h6" Style="font-weight: 600;">Finished</MudText></MudTh>
+                        <MudTh><MudText Typo="Typo.h6" Style="font-weight: 600;">Item</MudText></MudTh>
+                        <MudTh><MudText Typo="Typo.h6" Style="font-weight: 600;">Qty</MudText></MudTh>
+                        <MudTh><MudText Typo="Typo.h6" Style="font-weight: 600;">Action</MudText></MudTh>
+                        <MudTh><MudText Typo="Typo.h6" Style="font-weight: 600;">Weight</MudText></MudTh>
+                        <MudTh><MudText Typo="Typo.h6" Style="font-weight: 600;">Bin</MudText></MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Pick Ticket"><MudText Typo="Typo.h6">@context.EmployeeName</MudText></MudTd>
+                        <MudTd DataLabel="Order No"><MudText Typo="Typo.h6">@context.TransactionType</MudText></MudTd>
+                        <MudTd DataLabel="Date Printed"><MudText Typo="Typo.h6">@context.wireless_transaction_number</MudText></MudTd>
+                        <MudTd DataLabel="Lines"><MudText Typo="Typo.h6">@context.transaction_line_number</MudText></MudTd>
+                        <MudTd DataLabel="Weight"><MudText Typo="Typo.h6">@context.ActivityStartTime</MudText></MudTd>
+                        <MudTd DataLabel="Printer"><MudText Typo="Typo.h6">@context.ActivityTime</MudText></MudTd>
+                        <MudTd DataLabel="Printer"><MudText Typo="Typo.h6">@context.item_id</MudText></MudTd>
+                        <MudTd DataLabel="Printer"><MudText Typo="Typo.h6">@context.ItemDetail</MudText></MudTd>
+                        <MudTd DataLabel="Printer"><MudText Typo="Typo.h6">@context.ActionType</MudText></MudTd>
+                        <MudTd DataLabel="Printer"><MudText Typo="Typo.h6">@context.ItemWeight</MudText></MudTd>
+                        <MudTd DataLabel="Printer"><MudText Typo="Typo.h6">@context.bin_id</MudText></MudTd>
+                    </RowTemplate>
+                    <PagerContent>
+                        <MudTablePager PageSize="25" PageSizeOptions="new int[] { 25, 50, 100 }" />
+                    </PagerContent>
+
+                </MudTable>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private List<belWirelessTransactionsDaily> _orders = new List<belWirelessTransactionsDaily>();
+    private System.Threading.Timer? _navigationTimer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Set up timer for navigation
+        _navigationTimer = new System.Threading.Timer(NavigateToWarehouseActivity, null, 10000, Timeout.Infinite);
+    }
+    protected override void OnInitialized()
+    {
+        LoadData();
+    }
+    private void NavigateToWarehouseActivity(object? state)
+    {
+        InvokeAsync(() =>
+        {
+            NavigationManager.NavigateTo("/DailyWeightPicked");
+            _navigationTimer?.Dispose();
+        });
+    }
+
+    private void LoadData()
+    {
+        _orders = readbelWirelessTransactionsDailyUseCase.Execute();
+    }
+
+    public void Dispose()
+    {
+        _navigationTimer?.Dispose();
+    }
+}

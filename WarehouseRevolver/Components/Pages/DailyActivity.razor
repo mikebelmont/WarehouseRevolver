@@ -1,0 +1,68 @@
+﻿@page "/warehouseactivity"
+@inject IReadWarehouseActivityUseCase readWarehouseActivityUseCase
+@inject ISnackbar Snackbar
+@inject NavigationManager NavigationManager
+
+<MudContainer MaxWidth="MaxWidth.ExtraExtraLarge" Class="ma-0">
+    <MudPaper Elevation="3" Class="pa-0">
+        <MudGrid>
+            <MudItem xs="12">
+                <MudText Typo="Typo.h2" Color="Color.Primary" Class="ma-3" Align="Align.Center">Transaction (header) Activity</MudText>
+                <MudTable Items="@_orders" Dense="true" Hover="true">
+                    <HeaderContent>
+                        <MudTh><MudText Typo="Typo.h6" Style="font-weight: 600;">Location</MudText></MudTh>
+                        <MudTh><MudText Typo="Typo.h6" Style="font-weight: 600;">Type</MudText></MudTh>
+                        <MudTh><MudText Typo="Typo.h6" Style="font-weight: 600;">Number</MudText></MudTh>
+                        <MudTh><MudText Typo="Typo.h6" Style="font-weight: 600;">Employee</MudText></MudTh>
+                        <MudTh><MudText Typo="Typo.h6" Style="font-weight: 600;">Started</MudText></MudTh>
+                        <MudTh><MudText Typo="Typo.h6" Style="font-weight: 600;">Duration</MudText></MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Pick Ticket"><MudText Typo="Typo.h6">@context.location_id</MudText></MudTd>
+                        <MudTd DataLabel="Order No"><MudText Typo="Typo.h6">@context.WarehouseType</MudText></MudTd>
+                        <MudTd DataLabel="Date Printed"><MudText Typo="Typo.h6">@context.wireless_transaction_number</MudText></MudTd>
+                        <MudTd DataLabel="Lines"><MudText Typo="Typo.h6">@context.name</MudText></MudTd>
+                        <MudTd DataLabel="Weight"><MudText Typo="Typo.h6">@context.ScanStarted</MudText></MudTd>
+                        <MudTd DataLabel="Printer"><MudText Typo="Typo.h6">@context.MinutesWorked</MudText></MudTd>
+                    </RowTemplate>
+                    <PagerContent>
+                        <MudTablePager PageSize="25" PageSizeOptions="new int[] { 25, 50, 100 }" />
+                    </PagerContent>
+                </MudTable>
+            </MudItem>
+        </MudGrid>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private List<WarehouseActivity> _orders = new List<WarehouseActivity>();
+    private System.Threading.Timer? _navigationTimer;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Set up timer for navigation
+        _navigationTimer = new System.Threading.Timer(NavigateToWarehouseActivity, null, 10000, Timeout.Infinite);
+    }
+    protected override void OnInitialized()
+    {
+        LoadData();
+    }
+    private void NavigateToWarehouseActivity(object? state)
+    {
+        InvokeAsync(() =>
+        {
+            NavigationManager.NavigateTo("/WirehouseActivityDaily");
+            _navigationTimer?.Dispose();
+        });
+    }
+
+    private void LoadData()
+    {
+        _orders = readWarehouseActivityUseCase.Execute();
+    }
+
+    public void Dispose()
+    {
+        _navigationTimer?.Dispose();
+    }
+}
